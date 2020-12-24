@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>in.kodecamp</groupId>
+  <artifactId>poc-javaeemvc</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>war</packaging>
+
+  <name>demo-jmvc Maven Webapp</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <failOnMissingWebXml>false</failOnMissingWebXml>
+
+    <tomee.default.httpport>8081</tomee.default.httpport>
+    <tomee.version>8.0.0</tomee.version>
+    <tomee.profile>microprofile</tomee.profile>
+
+    <!-- Jakarta EE API -->
+    <version.javaee-api>8.0.1</version.javaee-api>
+    <version.javaee-mvc>1.0.0</version.javaee-mvc>
+
+    <!-- Eclipse Krazo -->
+    <version.krazo>1.1.0</version.krazo>
+
+    <!-- Maven Plugins -->
+    <version.maven-compiler-plugin>3.8.1</version.maven-compiler-plugin>
+
+
+    <!-- Glassfish server -->
+    <!-- <glassfish.version>5.1.0</glassfish.version> -->
+    <!-- <arquillian-glassfish.version>1.0.2</arquillian-glassfish.version> -->
+    <!-- <jersey.version>2.28</jersey.version> -->
+    <!-- <eclipselink.version>2.7.7</eclipselink.version> -->
+
+    <!-- Payara server -->
+    <!-- <payara.version>5.2020.7</payara.version> -->
+    <!-- <arquillian-payara-server.version>2.3.1</arquillian-payara-server.version> -->
+
+    <!-- Wildfly server-->
+    <!-- <wildfly.version>21.0.1.Final</wildfly.version> -->
+    <!-- <wildfly-maven-plugin.version>2.1.0.Beta1</wildfly-maven-plugin.version> -->
+    <!-- <wildfly-arquillian.version>2.2.0.Final</wildfly-arquillian.version> -->
+    <!--  websockets-jsr and resteasy for client, aligned with Wildfly version. -->
+    <!-- <undertow-websockets-jsr.version>2.0.26.Final</undertow-websockets-jsr.version> -->
+    <!-- <resteasy.version>3.9.0.Final</resteasy.version> -->
+
+    <!-- OpenLiberty server -->
+    <!-- <liberty.runtime.version>20.0.0.1</liberty.runtime.version> -->
+    <!-- WARNING: 10.15.x.x does not work with openliberty 20.0.0.1 -->
+    <!-- <derby.version>10.14.2.0</derby.version> -->
+    <!-- <liberty-maven-plugin.version>3.3.3</liberty-maven-plugin.version> -->
+
+    <!-- By default, skip tests -->
+    <skipTests>true</skipTests>
+
+    </properties>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-api</artifactId>
+      <version>${version.javaee-api}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- standard mvc api -->
+    <dependency>
+        <groupId>javax.mvc</groupId>
+        <artifactId>javax.mvc-api</artifactId>
+        <version>${version.javaee-mvc}</version>
+    </dependency>
+
+    <!-- Core of krazo -->
+    <dependency>
+      <groupId>org.eclipse.krazo</groupId>
+      <artifactId>krazo-core</artifactId>
+      <version>${version.krazo}</version>
+    </dependency>
+
+    <!-- Tomee Specific implementation of krazo -->
+    <dependency>
+      <groupId>org.eclipse.krazo</groupId>
+      <artifactId>krazo-cxf</artifactId>
+      <version>${version.krazo}</version>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <finalName>demo-jmvc</finalName>
+      <plugins>
+
+        <!-- maven-compiler-plugin -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${version.maven-compiler-plugin}</version>
+          <configuration>
+              <!-- only compiles the changed files -->
+            <useIncrementalCompilation>false</useIncrementalCompilation>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.tomee.maven</groupId>
+          <artifactId>tomee-maven-plugin</artifactId>
+          <version>${tomee.version}</version>
+          <executions>
+            <execution>
+              <id>executable-jar</id>
+              <phase>package</phase>
+              <goals>
+                <goal>exec</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <catalinaBase>${tomee.root}</catalinaBase>
+            <context>ROOT</context>
+            <args>-Xmx256m -XX:MaxMetaspaceSize=128m</args>
+            <libs>
+              <lib>javax.mvc:javax.mvc-api:1.0.0</lib>
+              <lib>org.eclipse.krazo:krazo-core:${version.krazo}</lib>
+              <lib>org.eclipse.krazo:krazo-cxf:${version.krazo}</lib>
+            </libs>
+            <tomeeClassifier>${tomee.profile}</tomeeClassifier>
+            <tomeeHttpPort>${tomee.default.httpport}</tomeeHttpPort>
+            <tomeeShutdownPort>8006</tomeeShutdownPort>
+            <tomeeAjpPort>8010</tomeeAjpPort>
+            <synchronization>
+              <extensions>
+                <extension>.class</extension> <!-- if you want to update each time you build with mvn compile -->
+              </extensions>
+            </synchronization>
+            <systemVariables>
+              <tomee.serialization.class.whitelist />
+              <tomee.serialization.class.blacklist>-</tomee.serialization.class.blacklist>
+              <openejb.system.apps>true</openejb.system.apps>
+              <tomee.remote.support>true</tomee.remote.support>
+            </systemVariables>
+            <reloadOnUpdate>true</reloadOnUpdate>
+          </configuration>
+        </plugin>
+      </plugins>
+  </build>
+</project>
